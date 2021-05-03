@@ -1,0 +1,2 @@
+vim /etc/crontab
+* * * * * root /usr/bin/python3 /root/zuqiu/daxiaopan.py > /root/zuqiu/auto.log
