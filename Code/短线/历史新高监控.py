@@ -1,9 +1,12 @@
 import time
-import os
+import os,sys
 import ccxt
-import Code.base.Tool as Tool
 import pandas as pd
+sys.path.append('/root/coin2021')
+
 import Code.wechat as wechat
+import Code.base.Tool as Tool
+
 
 #  ======参数=======
 
@@ -46,7 +49,6 @@ for k in tickers:
         continue
     if 'UP/' in k:
         continue
-    print(len(df.index.values))
     if k in df.index.values:
         max = df.at[k, 'max']
         bid = tickers[k]['bid']
