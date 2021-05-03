@@ -1,2 +1,9 @@
 tmp/*
 *.pyc
+*.temp
+*.csv
+*.config
+*.xml
+*.iml
+*.jpg
+data/*

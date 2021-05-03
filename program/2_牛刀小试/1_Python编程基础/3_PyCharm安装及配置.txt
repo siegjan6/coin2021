@@ -1,0 +1,33 @@
+"""
+《邢不行-2020新版|Python数字货币量化投资课程》
+无需编程基础，助教答疑服务，专属策略网站，一旦加入，永续更新。
+课程详细介绍：https://quantclass.cn/crypto/class
+邢不行微信: xbx9025
+本文作者: 邢不行/西蒙斯
+"""
+
+# 什么是PyCharm
+PyCharm就是一个Python代码的编辑器。
+理论上你也可以用记事本来写Python代码，或者Anaconda中的Spider来写。
+
+PyCharm是我们课程中，推荐给各位同学使用的Python代码编辑器。
+
+
+# 当前课程使用的版本为：
+> PyCharm Community Edition 2019.3.3，下载链接如下
+
+Win：https://download.jetbrains.com/python/pycharm-community-2019.3.3.exe
+Mac：https://download.jetbrains.com/python/pycharm-community-2019.3.3.dmg
+
+小建议：可以将上面的地址放入迅雷下载中，会有非常大的增速。
+
+
+# 视频中完全一致的版本
+> 如果链接失效，可以在这个页面上去下载历史版本，保持为2019.3开头的版本基本是一模一样的
+https://www.jetbrains.com/pycharm/download/other.html
+
+
+# PyCharm最新版安装文件下载页面
+Windows：https://www.jetbrains.com/pycharm/download/#section=windows
+Mac：https://www.jetbrains.com/pycharm/download/#section=mac
+
