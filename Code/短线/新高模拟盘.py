@@ -1,8 +1,9 @@
 import pandas as pd
-import os, sys
+import os,sys
 import ccxt
 import time
 import datetime
+
 
 if sys.platform != 'win32':
     sys.path.append('/root/coin2021')
@@ -18,14 +19,11 @@ class CoinNewHighMgr:
     def __init__(self):
         self.ex = ccxt.binance()
         self.bias_pct = 0.01  # 低于这个阈值挂单
-        if os.path.isfile('highPrice.csv'):
-            self.df = pd.read_csv('highPrice.csv', encoding='gbk', index_col='symbol')
-        else:
-            self.df = self.onInitHighPrice(self.getSymbols())
-            self.df.to_csv('highPrice.csv', encoding='gbk')
+        self.df = self.onInitHighPrice()
 
-    def onInitHighPrice(self, symbolList):
-        lst=[]
+    def onInitHighPrice(self):
+        lst = []
+        symbolList = self.getSymbols()
         for symbol in symbolList:
             obj = self.ex.fetch_ohlcv(symbol, timeframe='1M')
             df = pd.DataFrame(obj, dtype=float)
@@ -67,6 +65,7 @@ class CoinNewHighMgr:
         except:
             return []
 
+
     """
         'symbol': 'BTC/USDT',
         'timestamp': 1620101863798,
@@ -98,20 +97,27 @@ class CoinNewHighMgr:
                 if bid > dfMax:
                     self.df.loc[symbol, 'max'] = bid
                     self.df.loc[symbol, 'changeTime'] = pd.to_datetime(obj['timestamp'], unit='ms')
-                    self.df.to_csv('highPrice.csv', encoding='gbk')
                     self.onHighPrice(obj)
             else:  # 新币 暂不处理
                 pass
 
     def onHighPrice(self, obj):
+        path = 'highPrice.csv'
         dd = pd.DataFrame(columns=['symbol', 'bidPrice', 'dateTime'])
         dd.set_index('symbol', inplace=True)
+        if os.path.isfile(path):
+            dd = pd.read_csv(path, encoding='gbk', index_col='symbol')
+        # if obj['symbol'] in dd.index.values: #新高触发过就  忽略
+        #     pass
+        # else:
         dd.loc[obj['symbol']] = [obj['bid'], pd.to_datetime(obj['timestamp'], unit='ms')]
+        dd.to_csv(path, encoding='gbk')
         wx.send_data(dd.to_string())
 
     # 挂单
     def onOrder(self, symbol, price):
         print(symbol, price, datetime.datetime.now())
+        
 
     def run(self):
         # 撤单
@@ -121,5 +127,7 @@ class CoinNewHighMgr:
 
 
 engine = CoinNewHighMgr()
-engine.updateData()
+while True:
+    engine.updateData()
+    time.sleep(10)
 

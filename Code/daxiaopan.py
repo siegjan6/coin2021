@@ -3,7 +3,7 @@ from datetime import timedelta
 import pandas as pd
 import time
 from base.Tool import *
-import wechat
+from Code.base import wechat
 
 # print(ccxt.__version__)  # 检查ccxt版本，需要最新版本，1.44.21以上
 wx = wechat.WeChat()
