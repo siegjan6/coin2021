@@ -106,8 +106,8 @@ class CoinNewHighMgr:
     def onHighPrice(self, obj):
         dd = pd.DataFrame(columns=['symbol', 'bidPrice', 'dateTime'])
         dd.set_index('symbol', inplace=True)
-        dd.loc[obj['symbol']] = [obj['bid'], pd.to_datetime(obj['timestamp'], unit='ms')]
-        wx.send_data(dd.to_string())
+        dd.loc[obj['symbol']] = [obj['bid'], pd.to_datetime(obj['timestamp'], unit='ms').date()]
+        wx.send_data(dd.head(1).to_string())
 
     # 挂单
     def onOrder(self, symbol, price):
