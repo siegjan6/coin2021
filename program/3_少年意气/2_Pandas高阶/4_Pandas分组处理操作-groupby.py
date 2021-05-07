@@ -51,8 +51,8 @@ df = pd.read_csv(r'C:\Users\Simons\Desktop\xbx_coin_2020\data\cls-3.2BITFINEX-1H
 # 在group之后，取一部分变量进行计算
 # 计算每个group的均值
 # print(df.groupby('symbol')['close', 'volume'].mean())
-# print(df.groupby('symbol')['close', 'volume'].max())
 # 计算每个group的最大值
+# print(df.groupby('symbol')['close', 'volume'].max())
 
 # 计算每个group的加总
 # print(df.groupby('symbol')['volume'].sum())
