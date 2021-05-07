@@ -4,9 +4,9 @@ import configparser
 
 class Config(object):
     def __init__(self, config_file='config.ini'):
-        self._path = os.path.join(os.getcwd(), config_file)
-        self._path = r"C:\Users\jan\Documents\xingbuxing\coin2020\Code\config\config.ini"
-        # print(self._path)
+        cwd = os.getcwd().split('coin2021')[0] + 'coin2021\\Code\\config'
+        self._path = os.path.join(cwd, config_file)
+        print(self._path)
         if not os.path.exists(self._path):
             raise FileNotFoundError("No such file: config.ini")
         self._config = configparser.ConfigParser()
@@ -24,6 +24,8 @@ class Config(object):
 global_config = Config()
 # apiKey = global_config.getRaw('config', 'apiKey1613')
 # secret = global_config.getRaw('config', 'secret1613')
-apiKey = global_config.getRaw('config', 'apiKey171')
-secret = global_config.getRaw('config', 'secret171')
+# apiKey = global_config.getRaw('config', 'apiKey171')
+# secret = global_config.getRaw('config', 'secret171')
 
+apiKey = global_config.getRaw('config', 'apiKey3266')
+secret = global_config.getRaw('config', 'secret3266')

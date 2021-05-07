@@ -105,6 +105,7 @@ def if_oneway_mode(exchange):
     :return:
     """
     positionSide = exchange.fapiPrivateGetPositionSideDual()
+
     if positionSide['dualSidePosition']:
         raise ValueError("当前持仓模式为双向持仓，程序已停止运行。请去币安官网改为单向持仓。")
     else:
