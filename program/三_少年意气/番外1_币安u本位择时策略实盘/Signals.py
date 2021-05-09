@@ -105,6 +105,7 @@ def real_signal_simple_bolling(df, now_pos, avg_price, para=[200, 2]):
 
 
 # 【西瓜蹲】自适应布林+bias+布林强盗止盈止损_BTC: 4.64 (达标)、ETH: 9.00 (达标)、参数1
+# https://bbs.quantclass.cn/thread/4378
 def singal_adaptboll_bandit_bias(df, now_pos, avg_price, para=[547]):
 
     # ===策略参数
@@ -176,7 +177,7 @@ def singal_adaptboll_bandit_bias(df, now_pos, avg_price, para=[547]):
     df['signal'] = df['temp']
 
     # Bandit start
-    # 计算k线之间的时差，秒为单位
+    # 计算k线之间的时差，秒为单位!
     time_diff = (df['candle_begin_time'].values[1] - df['candle_begin_time'].values[0]) / np.timedelta64(1, 's')
     # 标记开平仓时间
     df['start_time'] = np.where(df['signal'] != df['signal'].shift(1), df['candle_begin_time'], np.datetime64('NaT'))
