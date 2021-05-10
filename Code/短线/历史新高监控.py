@@ -25,16 +25,18 @@ class CoinNewHighMgr:
             self.df.to_csv('highPrice.csv', encoding='gbk')
 
     def onInitHighPrice(self, symbolList):
-        lst=[]
+        lst = []
         for symbol in symbolList:
-            obj = self.ex.fetch_ohlcv(symbol, timeframe='1M')
+            obj = self.ex.fetch_ohlcv(symbol, timeframe='3d', limit=1440)
             df = pd.DataFrame(obj, dtype=float)
             df[0] = pd.to_datetime(df[0], unit='ms')  # 整理时间
             max = df[2].max()
             last = df.iat[-1, 4]
-            lst.append([symbol, max, last])
+            df.sort_values(by=[2], inplace=True)
+            maxTime = df.iat[-1, 0]
+            lst.append([symbol, max, maxTime])
             time.sleep(.3)
-        df = pd.DataFrame(lst, columns=['symbol', 'max', 'last'])
+        df = pd.DataFrame(lst, columns=['symbol', 'max', 'maxTime'])
         df.set_index('symbol', inplace=True)
         return df
 
@@ -94,20 +96,26 @@ class CoinNewHighMgr:
             symbol = obj['symbol']
             bid = obj['bid']
             dfMax = self.df.at[symbol, 'max']
+            dfMaxTime = self.df.at[symbol, 'maxTime']
+            dfMaxTime = pd.to_datetime(dfMaxTime)
+            dff = pd.to_datetime(obj['timestamp'], unit='ms') - dfMaxTime
+            # dff = dff.days()  # 天差
             if symbol in self.df.index.values:
-                if bid > dfMax:
+                if bid > dfMax and dff > 3:
                     self.df.loc[symbol, 'max'] = bid
-                    self.df.loc[symbol, 'changeTime'] = pd.to_datetime(obj['timestamp'], unit='ms')
+                    self.df.loc[symbol, 'maxTime'] = pd.to_datetime(obj['timestamp'], unit='ms')
                     self.df.to_csv('highPrice.csv', encoding='gbk')
-                    self.onHighPrice(obj)
+                    self.onHighPrice(obj,dff)
             else:  # 新币 暂不处理
-                pass
+                self.df.loc[symbol, 'max'] = bid
+                self.df.loc[symbol, 'maxTime'] = pd.to_datetime(obj['timestamp'], unit='ms')
+                self.df.to_csv('highPrice.csv', encoding='gbk')
 
-    def onHighPrice(self, obj):
-        dd = pd.DataFrame(columns=['symbol', 'bidPrice', 'dateTime'])
-        dd.set_index('symbol', inplace=True)
-        dd.loc[obj['symbol']] = [obj['bid'], pd.to_datetime(obj['timestamp'], unit='ms').date()]
-        wx.send_data(dd.head(1).to_string())
+    def onHighPrice(self, obj, dff):
+        symbol = obj['symbol']
+        bid = obj['bid']
+        data = symbol + ' ' + dff + '天后突破新高' + '\n' + bid
+        wx.send_data(data)
 
     # 挂单
     def onOrder(self, symbol, price):
@@ -122,4 +130,3 @@ class CoinNewHighMgr:
 
 engine = CoinNewHighMgr()
 engine.updateData()
-
