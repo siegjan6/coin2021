@@ -4,7 +4,7 @@ import configparser
 
 class Config(object):
     def __init__(self, config_file='config.ini'):
-        cwd = os.getcwd().split('coin2021')[0] + 'coin2021\\Code\\config'
+        cwd = os.getcwd().split('coin2021')[0] + 'coin2021/Code/config'
         self._path = os.path.join(cwd, config_file)
         print(self._path)
         if not os.path.exists(self._path):
