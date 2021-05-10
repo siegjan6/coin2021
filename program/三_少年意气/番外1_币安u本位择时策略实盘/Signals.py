@@ -178,7 +178,6 @@ def singal_adaptboll_bandit_bias(df, now_pos, avg_price, para=[547]):
 
     # Bandit start
     # 计算k线之间的时差，秒为单位!
-    print(df)
     df['candle_begin_time'] = df['candle_begin_time_GMT8']
     time_diff = (df['candle_begin_time'].values[1] - df['candle_begin_time'].values[0]) / np.timedelta64(1, 's')
     # 标记开平仓时间

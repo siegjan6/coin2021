@@ -26,6 +26,9 @@ global_config = Config()
 # secret = global_config.getRaw('config', 'secret1613')
 # apiKey = global_config.getRaw('config', 'apiKey171')
 # secret = global_config.getRaw('config', 'secret171')
+#
+# apiKey = global_config.getRaw('config', 'apiKey3266')
+# secret = global_config.getRaw('config', 'secret3266')
 
-apiKey = global_config.getRaw('config', 'apiKey3266')
-secret = global_config.getRaw('config', 'secret3266')
+apiKey = global_config.getRaw('config', 'apiKeyZjc')
+secret = global_config.getRaw('config', 'secretZjc')
