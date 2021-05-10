@@ -98,6 +98,8 @@ def main():
             order_list = symbol_order_params[i:i + num]
             params = {'batchOrders': exchange.json(order_list),
                       'timestamp': int(time.time() * 1000)}
+            print(params)
+            exit()
             order_info = exchange.fapiPrivatePostBatchOrders(params)
             print('\n成交订单信息\n', order_info)
 

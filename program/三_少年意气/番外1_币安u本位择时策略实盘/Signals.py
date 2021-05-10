@@ -10,6 +10,7 @@
 """
 import pandas as pd
 import random
+import numpy as np
 
 
 # 将None作为信号返回
@@ -103,11 +104,9 @@ def real_signal_simple_bolling(df, now_pos, avg_price, para=[200, 2]):
     return signal
 
 
-
 # 【西瓜蹲】自适应布林+bias+布林强盗止盈止损_BTC: 4.64 (达标)、ETH: 9.00 (达标)、参数1
 # https://bbs.quantclass.cn/thread/4378
 def singal_adaptboll_bandit_bias(df, now_pos, avg_price, para=[547]):
-
     # ===策略参数
     n = int(para[0])
 
@@ -116,6 +115,7 @@ def singal_adaptboll_bandit_bias(df, now_pos, avg_price, para=[547]):
     df['median'] = df['close'].rolling(n, min_periods=1).mean()
     # 计算上轨、下轨道
     df['std'] = df['close'].rolling(n, min_periods=1).std(ddof=0)
+
     df['z_score'] = abs(df['close'] - df['median']) / df['std']
     df['m'] = df['z_score'].rolling(window=n).max().shift(1)
     df['upper'] = df['median'] + df['m'] * df['std']
@@ -178,6 +178,8 @@ def singal_adaptboll_bandit_bias(df, now_pos, avg_price, para=[547]):
 
     # Bandit start
     # 计算k线之间的时差，秒为单位!
+    print(df)
+    df['candle_begin_time'] = df['candle_begin_time_GMT8']
     time_diff = (df['candle_begin_time'].values[1] - df['candle_begin_time'].values[0]) / np.timedelta64(1, 's')
     # 标记开平仓时间
     df['start_time'] = np.where(df['signal'] != df['signal'].shift(1), df['candle_begin_time'], np.datetime64('NaT'))
@@ -197,9 +199,9 @@ def singal_adaptboll_bandit_bias(df, now_pos, avg_price, para=[547]):
     for i in range(0, len(close_list)):
         m = cnt_list[i]
         if i < m:
-            ma_list.append(close_list[0 : i+1].mean())
+            ma_list.append(close_list[0: i + 1].mean())
         else:
-            ma_list.append(close_list[i-m+1 : i+1].mean())
+            ma_list.append(close_list[i - m + 1: i + 1].mean())
 
     df['ma'] = ma_list
 
@@ -226,12 +228,12 @@ def singal_adaptboll_bandit_bias(df, now_pos, avg_price, para=[547]):
     # 将新信号赋值到原始信号
     df['signal'] = df['temp']
 
-
     # ===将signal中的重复值删除
     temp = df[['signal']]
     temp = temp[temp['signal'] != temp['signal'].shift(1)]
     df['signal'] = temp
 
-    df.drop(['raw_signal', 'z_score', 'm', 'std', 'z_score', 'temp', 'bias', 'bias_pct', 'signal_long', 'signal_short', 'start_time', 'time_diff', 'cnt'], axis=1, inplace=True)
-    print(df)
-    return df
+    df.drop(['raw_signal', 'z_score', 'm', 'std', 'z_score', 'temp', 'bias', 'bias_pct', 'signal_long', 'signal_short',
+             'start_time', 'time_diff', 'cnt'], axis=1, inplace=True)
+
+    return df.iloc[-1]['signal']
