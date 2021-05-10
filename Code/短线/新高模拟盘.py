@@ -1,10 +1,10 @@
 import pandas as pd
-import os,sys
 import ccxt
 import time
 import datetime
 
 
+import os,sys
 if sys.platform != 'win32':
     sys.path.append('/root/coin2021')
 import Code.base.Tool as tool
