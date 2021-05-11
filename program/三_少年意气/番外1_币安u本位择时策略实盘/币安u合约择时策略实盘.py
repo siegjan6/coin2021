@@ -80,8 +80,6 @@ def main():
         symbol_signal = calculate_signal(symbol_info, symbol_config, symbol_candle_data)
         print('\n产生信号时间:\n', symbol_info[['当前价格', '持仓方向', '目标持仓', '信号时间']])
         print('\n本周期交易计划:', symbol_signal)
-        # if symbol_signal != 0:
-        wx.send_data('\n本周期交易计划:'+str(symbol_signal))
 
         # ==========下单==========
         exchange.timeout = exchange_timeout  # 下单时需要增加timeout的时间，将timout恢复正常
@@ -90,13 +88,14 @@ def main():
         print('\n订单参数\n', symbol_order_params)
 
         # 开始批量下单
-        num = 1  # 批量下单的数量
+        num = 5  # 批量下单的数量
         for i in range(0, len(symbol_order_params), num):
             order_list = symbol_order_params[i:i + num]
             params = {'batchOrders': exchange.json(order_list),
                       'timestamp': int(time.time() * 1000)}
             order_info = exchange.fapiPrivatePostBatchOrders(params)
             print('\n成交订单信息\n', order_info)
+            wx.send_data('\n本周期交易计划:'+str(symbol_signal))
 
         # 本次循环结束
         print('\n', '-' * 40, '本次循环结束，%d秒后进入下一次循环' % long_sleep_time, '-' * 40, '\n\n')

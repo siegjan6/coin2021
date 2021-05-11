@@ -101,11 +101,11 @@ class CoinNewHighMgr:
             dff = pd.to_datetime(obj['timestamp'], unit='ms') - dfMaxTime
             # dff = dff.days()  # 天差
             if symbol in self.df.index.values:
-                if bid > dfMax and dff > 3:
+                if bid > dfMax and dff.days > 3:
                     self.df.loc[symbol, 'max'] = bid
                     self.df.loc[symbol, 'maxTime'] = pd.to_datetime(obj['timestamp'], unit='ms')
                     self.df.to_csv('highPrice.csv', encoding='gbk')
-                    self.onHighPrice(obj,dff)
+                    self.onHighPrice(obj,dff.days)
             else:  # 新币 暂不处理
                 self.df.loc[symbol, 'max'] = bid
                 self.df.loc[symbol, 'maxTime'] = pd.to_datetime(obj['timestamp'], unit='ms')
