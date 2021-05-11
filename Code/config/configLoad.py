@@ -35,6 +35,6 @@ secretZjc = global_config.getRaw('config', 'secretZjc')
 
 apiSecretDict = {
     'zjc':[apiKeyZjc, secretZjc],
-    '3266':[apiKey3266, secret3266]
+    '3266':[apiKey3266, secret3266],
     '171':[apiKey171, secret171]
 }
