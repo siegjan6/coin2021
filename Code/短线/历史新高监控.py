@@ -8,7 +8,8 @@ if sys.platform != 'win32':
     sys.path.append('/root/coin2021')
 import Code.base.Tool as tool
 import Code.base.wechat as wechat
-
+from Code.Function import *
+from Code.config.configLoad import *
 #  ======参数=======
 
 wx = wechat.WeChat()
@@ -17,6 +18,8 @@ wx = wechat.WeChat()
 class CoinNewHighMgr:
     def __init__(self):
         self.ex = ccxt.binance()
+        self.ex.apiKey = apiKey3266
+        self.ex.secret = secret3266
         self.bias_pct = 0.01  # 低于这个阈值挂单
         if os.path.isfile('highPrice.csv'):
             self.df = pd.read_csv('highPrice.csv', encoding='gbk', index_col='symbol')
@@ -115,6 +118,10 @@ class CoinNewHighMgr:
     def onHighPrice(self, obj, dff):
         symbol = obj['symbol']
         bid = obj['bid']
+        price = obj['ask'] * 1.02
+        spot_amount = 1000 / obj['ask']
+        spot_order_info = binance_spot_place_order(exchange=self.ex, symbol=symbol,
+                                                   long_or_short='买入',price=price , amount=spot_amount)
         data = symbol + ' ' + dff + '天后突破新高' + '\n' + bid
         wx.send_data(data)
 

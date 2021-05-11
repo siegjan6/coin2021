@@ -9,3 +9,4 @@ tmp/*
 data/*
 *.out
 *.log
+config.ini

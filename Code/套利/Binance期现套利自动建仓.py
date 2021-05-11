@@ -23,8 +23,8 @@ contact_size = {
 
 # ===创建交易所
 exchange = ccxt.binance()
-exchange.apiKey = apiKey
-exchange.secret = secret
+exchange.apiKey = apiSecretDict['171'][0]
+exchange.secret = apiSecretDict['171'][1]
 
 # ===开始套利
 execute_num = 0

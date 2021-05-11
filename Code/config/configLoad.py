@@ -24,8 +24,8 @@ class Config(object):
 global_config = Config()
 # apiKey = global_config.getRaw('config', 'apiKey1613')
 # secret = global_config.getRaw('config', 'secret1613')
-# apiKey = global_config.getRaw('config', 'apiKey171')
-# secret = global_config.getRaw('config', 'secret171')
+apiKey171 = global_config.getRaw('config', 'apiKey171')
+secret171 = global_config.getRaw('config', 'secret171')
 #
 apiKey3266 = global_config.getRaw('config', 'apiKey3266')
 secret3266 = global_config.getRaw('config', 'secret3266')
@@ -36,4 +36,5 @@ secretZjc = global_config.getRaw('config', 'secretZjc')
 apiSecretDict = {
     'zjc':[apiKeyZjc, secretZjc],
     '3266':[apiKey3266, secret3266]
+    '171':[apiKey171, secret171]
 }
