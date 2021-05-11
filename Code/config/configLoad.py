@@ -1,6 +1,7 @@
-import os
+import os, sys
 import configparser
-
+if sys.platform != 'win32':
+    sys.path.append('/root/coin2021')
 
 class Config(object):
     def __init__(self, config_file='config.ini'):
