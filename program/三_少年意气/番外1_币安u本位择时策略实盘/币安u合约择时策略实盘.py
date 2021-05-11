@@ -3,6 +3,7 @@ if sys.platform != 'win32':
     sys.path.append('/root/coin2021')
 import pandas as pd
 import ccxt
+import Code.base.wechat as wechat
 from Code.config.configLoad import *
 from program.三_少年意气.番外1_币安u本位择时策略实盘.Function import *
 from program.三_少年意气.番外1_币安u本位择时策略实盘.Config import *
@@ -11,6 +12,7 @@ pd.set_option('expand_frame_repr', False)  # 当列太多时不换行
 pd.set_option('display.unicode.ambiguous_as_wide', True)  # 设置命令行输出时的列对齐功能
 pd.set_option('display.unicode.east_asian_width', True)
 
+wx = wechat.WeChat()
 
 # ==========配置运行相关参数==========
 # =k线周期
@@ -33,7 +35,7 @@ exchange = ccxt.binance(BINANCE_CONFIG)  # 交易所api
 # ==========配置策略相关参数==========
 # =symbol_config，更新需要交易的合约、策略参数、下单量等配置信息。主键为u本位合约的symbol。比特币永续为BTCUSDT，交割为BTCUSDT_210625
 symbol_config = {
-    'ETHUSDT': {'leverage': 2,  # 控制实际交易的杠杆倍数，在实际交易中可以自己修改。此处杠杆数，必须小于页面上的最大杠杆数限制
+    'ETHUSDT': {'leverage': 3,  # 控制实际交易的杠杆倍数，在实际交易中可以自己修改。此处杠杆数，必须小于页面上的最大杠杆数限制
                  'strategy_name': 'singal_adaptboll_bandit_bias',  # 使用的策略的名称
                  'para': [547],  # 策略参数
                  'position': 1,  # 该币种在总体资金中占比，几个币种相加要小于1
@@ -78,6 +80,8 @@ def main():
         symbol_signal = calculate_signal(symbol_info, symbol_config, symbol_candle_data)
         print('\n产生信号时间:\n', symbol_info[['当前价格', '持仓方向', '目标持仓', '信号时间']])
         print('\n本周期交易计划:', symbol_signal)
+        # if symbol_signal != 0:
+        wx.send_data('\n本周期交易计划:'+str(symbol_signal))
 
         # ==========下单==========
         exchange.timeout = exchange_timeout  # 下单时需要增加timeout的时间，将timout恢复正常
@@ -86,13 +90,11 @@ def main():
         print('\n订单参数\n', symbol_order_params)
 
         # 开始批量下单
-        num = 5  # 批量下单的数量
+        num = 1  # 批量下单的数量
         for i in range(0, len(symbol_order_params), num):
             order_list = symbol_order_params[i:i + num]
             params = {'batchOrders': exchange.json(order_list),
                       'timestamp': int(time.time() * 1000)}
-            print(params)
-            exit()
             order_info = exchange.fapiPrivatePostBatchOrders(params)
             print('\n成交订单信息\n', order_info)
 

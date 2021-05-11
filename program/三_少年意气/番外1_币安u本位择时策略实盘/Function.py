@@ -49,7 +49,6 @@ def next_run_time(time_interval, ahead_seconds=5):
         time_interval = time_interval.replace('H', 'h')
     else:
         print('time_interval格式不符合规范。程序exit')
-        exit()
 
     ti = pd.to_timedelta(time_interval)
     now_time = datetime.now()
@@ -231,7 +230,7 @@ def single_threading_get_binance_candle_data(exchange, symbol_config, symbol_inf
 
         # 如果获取数据为空，再次获取
         # if df.empty:
-            # continue
+        # continue
 
         # 获取到了最新数据
         print('结束时间：', datetime.now())
@@ -272,7 +271,8 @@ def calculate_signal(symbol_info, symbol_config, symbol_candle_data):
         target_pos = None
         # 根据策略计算出目标交易信号。
         if not df.empty:  # 当原始数据不为空的时候
-            target_pos = getattr(Signals, symbol_config[symbol]['strategy_name'])(df, now_pos, avg_price,symbol_config[symbol]['para'])
+            target_pos = getattr(Signals, symbol_config[symbol]['strategy_name'])(df, now_pos, avg_price,
+                                                                                  symbol_config[symbol]['para'])
             print(symbol)
             print(target_pos)
             symbol_info.at[symbol, '目标持仓'] = target_pos
@@ -287,9 +287,11 @@ def calculate_signal(symbol_info, symbol_config, symbol_candle_data):
         elif now_pos == 0 and target_pos == -1:  # 开空
             symbol_signal['开空'].append(symbol)
         elif now_pos == 1 and target_pos == -1:  # 平多，开空
-            symbol_signal['平多开空'].append(symbol)
+            symbol_signal['平多'].append(symbol)
+            symbol_signal['开空'].append(symbol)
         elif now_pos == -1 and target_pos == 1:  # 平空，开多
-            symbol_signal['平空开多'].append(symbol)
+            symbol_signal['平空'].append(symbol)
+            symbol_signal['开多'].append(symbol)
 
         symbol_info.at[symbol, '信号时间'] = datetime.now()  # 计算产生信号的时间
 
@@ -312,12 +314,12 @@ def modify_order_quantity_and_price(symbol, symbol_config, params):
     """
 
     # 根据每个币种的精度，修改下单数量的精度
-    params['quantity'] = round(params['quantity'], symbol_config[symbol]['最小下单量精度'])
+    params['quantity'] = round(params['quantity'], int(symbol_config[symbol]['最小下单量精度']))
 
     # 买单加价2%，卖单降价2%
     params['price'] = params['price'] * 1.02 if params['side'] == 'BUY' else params['price'] * 0.98
     # 根据每个币种的精度，修改下单价格的精度
-    params['price'] = round(params['price'], symbol_config[symbol]['最小下单价精度'])
+    params['price'] = round(params['price'], int(symbol_config[symbol]['最小下单价精度']))
 
     return params
 
@@ -340,20 +342,18 @@ def cal_order_params(signal_type, symbol, symbol_info, symbol_config):
         'type': 'LIMIT',
         'timeInForce': 'GTC',
     }
-
     if signal_type in ['平空', '平多']:
         params['quantity'] = abs(symbol_info.at[symbol, '持仓量'])
 
     elif signal_type in ['开多', '开空']:
         params['quantity'] = symbol_info.at[symbol, '分配资金'] * symbol_config[symbol]['leverage'] / \
-                   symbol_info.at[symbol, '当前价格']
+                             symbol_info.at[symbol, '当前价格']
 
     else:
         close_quantity = symbol_info.at[symbol, '持仓量']
         open_quantity = symbol_info.at[symbol, '分配资金'] * symbol_config[symbol]['leverage'] / \
                         symbol_info.at[symbol, '当前价格']
         params['quantity'] = close_quantity + open_quantity
-
     # 修改精度
     params = modify_order_quantity_and_price(symbol, symbol_config, params)
 
@@ -410,6 +410,8 @@ def cal_all_order_info(symbol_signal, symbol_info, symbol_config, exchange):
             if params['quantity'] == 0:  # 考察下单量是否为0
                 print('\n', symbol, '下单量为0，忽略')
             elif params['price'] * params['quantity'] <= 5:  # 和最小下单额5美元比较
+                print(params)
+                print(params['price'], params['quantity'])
                 print('\n', symbol, '下单金额小于5u，忽略')
             else:
                 # 改成str
