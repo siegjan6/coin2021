@@ -7,3 +7,5 @@ tmp/*
 *.iml
 *.jpg
 data/*
+*.out
+*.log
