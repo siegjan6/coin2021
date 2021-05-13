@@ -108,6 +108,7 @@ class CoinNewHighMgr:
                     self.df.loc[symbol, 'max'] = bid
                     self.df.loc[symbol, 'maxTime'] = pd.to_datetime(obj['timestamp'], unit='ms')
                     self.df.to_csv('highPrice.csv', encoding='gbk')
+                    wx.send_data( symbol+ dff.days)
                     if dff.days > 3:
                         self.onHighPrice(obj, dff.days)
             else:  # 新币 暂不处理
