@@ -124,6 +124,7 @@ class CoinNewHighMgr:
         # spot_order_info = binance_spot_place_order(exchange=self.ex, symbol=symbol, long_or_short='买入',price=price , amount=spot_amount)
         data = symbol + ' ' + dff + '天后突破新高' + '\n' + bid
         wx.send_data(data)
+        self.ex.create_limit_buy_order()
 
     # 挂单
     def onOrder(self, symbol, price):
