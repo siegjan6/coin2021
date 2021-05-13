@@ -18,7 +18,7 @@ pd.set_option('expand_frame_repr', False)  # 当列太多时不换行
 
 # =====参数设定
 # 手工设定策略参数
-symbol = 'BTC-USDT_5m'
+symbol = 'DOGE-USDT_5m'
 
 face_value = 0.01  # btc是0.01，不同的币种要进行不同的替换
 c_rate = 5 / 10000  # 手续费，commission fees，默认为万分之5。不同市场手续费的收取方法不同，对结果有影响。比如和股票就不一样。
@@ -30,7 +30,7 @@ drop_days = 10  # 币种刚刚上线10天内不交易
 
 
 # =====读入数据
-df = pd.read_hdf('/Users/xingbuxingx/Desktop/数字货币量化课程/2020版数字货币量化投资课程/xbx_coin_2020/data/%s.h5' % symbol, key='df')
+df = pd.read_hdf(r'C:\Users\jan\Documents\GitHub\coin2021\data\%s.h5' % symbol, key='df')
 # 任何原始数据读入都进行一下排序、去重，以防万一
 df.sort_values(by=['candle_begin_time'], inplace=True)
 df.drop_duplicates(subset=['candle_begin_time'], inplace=True)
@@ -44,19 +44,18 @@ period_df = df.resample(rule=rule_type, on='candle_begin_time', label='left', cl
      'high': 'max',
      'low': 'min',
      'close': 'last',
-     'volume': 'sum',
-     'quote_volume': 'sum',
+     'volume': 'sum'
      })
 period_df.dropna(subset=['open'], inplace=True)  # 去除一天都没有交易的周期
 period_df = period_df[period_df['volume'] > 0]  # 去除成交量为0的交易周期
 period_df.reset_index(inplace=True)
-df = period_df[['candle_begin_time', 'open', 'high', 'low', 'close', 'volume', 'quote_volume']]
+df = period_df[['candle_begin_time', 'open', 'high', 'low', 'close', 'volume']]
 df = df[df['candle_begin_time'] >= pd.to_datetime('2017-01-01')]
 df.reset_index(inplace=True, drop=True)
 
 
 # =====获取策略参数组合
-para_list = signal_simple_bolling_para_list()
+para_list = signal_adp2boll_v2_para_list()
 
 
 # =====遍历参数
@@ -64,7 +63,7 @@ rtn = pd.DataFrame()
 for para in para_list:
     _df = df.copy()
     # 计算交易信号
-    _df = signal_simple_bolling(_df, para=para)
+    _df = signal_adp2boll_v2(_df, para=para)
     # 计算实际持仓
     _df = position_for_OKEx_future(_df)
     # 计算资金曲线

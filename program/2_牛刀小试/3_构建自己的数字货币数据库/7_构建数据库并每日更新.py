@@ -97,7 +97,7 @@ while date <= pd.to_datetime(end_date):
     date_list.append(str(date))
     date += datetime.timedelta(days=1)
 
-path = r'C:\Users\jan\Documents\xingbuxing\coin2020\data'
+path = r'C:\Users\jan\Documents\GitHub\coin2021\data'
 error_list = []
 
 
@@ -109,7 +109,7 @@ for exchange in [ccxt.binance()]:
     market = pd.DataFrame(market).T
 
     symbol_list = list(market['symbol'])
-    symbol_list = ['ETH/USDT', 'BTC/USDT']  #替换上面
+    symbol_list = ['ETH/USDT', 'BTC/USDT', 'DOGE/USDT']  #替换上面
 
     # 遍历交易对
     for symbol in symbol_list:
