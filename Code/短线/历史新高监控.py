@@ -98,20 +98,20 @@ class CoinNewHighMgr:
         for obj in tickers:
             symbol = obj['symbol']
             bid = obj['bid']
-            dfMax = self.df.at[symbol, 'max']
-            dfMaxTime = self.df.at[symbol, 'maxTime']
-            dfMaxTime = pd.to_datetime(dfMaxTime)
-            dff = pd.to_datetime(obj['timestamp'], unit='ms') - dfMaxTime
-            # dff = dff.days()  # 天差
             if symbol in self.df.index.values:
+                dfMax = self.df.at[symbol, 'max']
+                dfMaxTime = self.df.at[symbol, 'maxTime']
+                dfMaxTime = pd.to_datetime(dfMaxTime)
+                dff = pd.to_datetime(obj['timestamp'], unit='ms') - dfMaxTime
+                # dff = dff.days()  # 天差
                 if bid > dfMax:
                     self.df.loc[symbol, 'max'] = bid
                     self.df.loc[symbol, 'maxTime'] = pd.to_datetime(obj['timestamp'], unit='ms')
                     self.df.to_csv('highPrice.csv', encoding='gbk')
-                    wx.send_data( symbol+ dff.days)
-                    if dff.days > 3:
+                    if dff.days > 2:
                         self.onHighPrice(obj, dff.days)
             else:  # 新币 暂不处理
+                print(symbol)
                 self.df.loc[symbol, 'max'] = bid
                 self.df.loc[symbol, 'maxTime'] = pd.to_datetime(obj['timestamp'], unit='ms')
                 self.df.to_csv('highPrice.csv', encoding='gbk')
@@ -121,8 +121,7 @@ class CoinNewHighMgr:
         bid = obj['bid']
         price = obj['ask'] * 1.02
         spot_amount = 1000 / obj['ask']
-        spot_order_info = binance_spot_place_order(exchange=self.ex, symbol=symbol,
-                                                   long_or_short='买入',price=price , amount=spot_amount)
+        # spot_order_info = binance_spot_place_order(exchange=self.ex, symbol=symbol, long_or_short='买入',price=price , amount=spot_amount)
         data = symbol + ' ' + dff + '天后突破新高' + '\n' + bid
         wx.send_data(data)
 
