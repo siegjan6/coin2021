@@ -18,7 +18,7 @@ pd.set_option('expand_frame_repr', False)  # 当列太多时不换行
 
 # =====参数设定
 # 手工设定策略参数
-symbol = 'DOGE-USDT_5m'
+symbol = 'ETH-USDT_5m'
 
 face_value = 0.01  # btc是0.01，不同的币种要进行不同的替换
 c_rate = 5 / 10000  # 手续费，commission fees，默认为万分之5。不同市场手续费的收取方法不同，对结果有影响。比如和股票就不一样。
@@ -55,7 +55,7 @@ df.reset_index(inplace=True, drop=True)
 
 
 # =====获取策略参数组合
-para_list = signal_adp2boll_v2_para_list()
+para_list = signal_simple_bolling_para_list()
 
 
 # =====遍历参数
@@ -63,7 +63,7 @@ rtn = pd.DataFrame()
 for para in para_list:
     _df = df.copy()
     # 计算交易信号
-    _df = signal_adp2boll_v2(_df, para=para)
+    _df = signal_simple_bolling(_df, para=para)
     # 计算实际持仓
     _df = position_for_OKEx_future(_df)
     # 计算资金曲线

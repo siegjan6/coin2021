@@ -103,7 +103,6 @@ def real_signal_simple_bolling(df, now_pos, avg_price, para=[200, 2]):
 
     return signal
 
-
 # 【西瓜蹲】自适应布林+bias+布林强盗止盈止损_BTC: 4.64 (达标)、ETH: 9.00 (达标)、参数1
 # https://bbs.quantclass.cn/thread/4378
 def singal_adaptboll_bandit_bias(df, now_pos, avg_price, para=[547]):

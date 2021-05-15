@@ -97,18 +97,18 @@ if __name__ == '__main__':
     # =symbol_config，更新需要交易的合约、策略参数、下单量等配置信息。主键为u本位合约的symbol。比特币永续为BTCUSDT，交割为BTCUSDT_210625
     symbol_config = {
         'ETHUSDT': {'leverage': 2,  # 控制实际交易的杠杆倍数，在实际交易中可以自己修改。此处杠杆数，必须小于页面上的最大杠杆数限制
-                    'strategy_name': 'signal_adp2boll_v2',  # 使用的策略的名称
-                    'para': [895],  # 策略参数
+                    'strategy_name': 'real_signal_simple_bolling',  # 使用的策略的名称
+                    'para': [220, 0.5],  # 策略参数
                     'position': .3,  # 该币种在总体资金中占比，几个币种相加要小于1
                     },
         'BTCUSDT': {'leverage': 2,  # 控制实际交易的杠杆倍数，在实际交易中可以自己修改。此处杠杆数，必须小于页面上的最大杠杆数限制
-                    'strategy_name': 'signal_adp2boll_v2',  # 使用的策略的名称
-                    'para': [850],  # 策略参数
+                    'strategy_name': 'real_signal_simple_bolling',  # 使用的策略的名称
+                    'para': [350, 0.5],  # 策略参数
                     'position': .3,  # 该币种在总体资金中占比，几个币种相加要小于1
                     },
         'DOGEUSDT': {'leverage': 2,  # 控制实际交易的杠杆倍数，在实际交易中可以自己修改。此处杠杆数，必须小于页面上的最大杠杆数限制
-                    'strategy_name': 'signal_adp2boll_v2',  # 使用的策略的名称
-                    'para': [1495],  # 策略参数
+                    'strategy_name': 'real_signal_simple_bolling',  # 使用的策略的名称
+                    'para': [300, 1.4],  # 策略参数
                     'position': .4,  # 该币种在总体资金中占比，几个币种相加要小于1
                     },
     }
