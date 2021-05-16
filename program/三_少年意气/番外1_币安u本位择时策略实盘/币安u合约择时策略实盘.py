@@ -62,10 +62,9 @@ def main(exchange):
         exchange.timeout = exchange_timeout  # 下单时需要增加timeout的时间，将timout恢复正常
         # 计算下单信息
         symbol_order_params = cal_all_order_info(symbol_signal, symbol_info, symbol_config, exchange)
-        if symbol_signal != 0:
-            wx.send_data('\n本周期交易计划:'+ sys.argv[1] + ' ' +str(symbol_signal))
         print('\n订单参数\n', symbol_order_params)
-
+        if len(symbol_order_params) != 0:
+            wx.send_data('\n本周期交易计划:' + sys.argv[1] + ' ' + str(symbol_signal))
         # 开始批量下单
         num = 5  # 批量下单的数量
         for i in range(0, len(symbol_order_params), num):
