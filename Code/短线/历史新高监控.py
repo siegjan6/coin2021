@@ -108,7 +108,7 @@ class CoinNewHighMgr:
                     self.df.loc[symbol, 'max'] = bid
                     self.df.loc[symbol, 'maxTime'] = pd.to_datetime(obj['timestamp'], unit='ms')
                     self.df.to_csv('highPrice.csv', encoding='gbk')
-                    wx.send_data(symbol + ' ' + str(dff.days))
+                    # wx.send_data(symbol + ' ' + str(dff.days))
                     if dff.days > 2:
                         self.onHighPrice(obj, dff.days)
             else:  # 新币 暂不处理
@@ -123,9 +123,9 @@ class CoinNewHighMgr:
         price = obj['ask'] * 1.02
         spot_amount = 1000 / obj['ask']
         # spot_order_info = binance_spot_place_order(exchange=self.ex, symbol=symbol, long_or_short='买入',price=price , amount=spot_amount)
-        data = symbol + ' ' + dff + '天后突破新高' + '\n' + bid
+        data = symbol + ' ' + str(dff) + '天后突破新高' + '\n' + str(bid)
         wx.send_data(data)
-        self.ex.create_limit_buy_order()
+        # self.ex.create_limit_buy_order()
 
     # 挂单
     def onOrder(self, symbol, price):
