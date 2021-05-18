@@ -18,7 +18,7 @@ wx = wechat.WeChat()
 # =k线周期
 time_interval = '15m'  # 目前支持5m，15m，30m，1h，2h等。得交易所支持的K线才行。最好不要低于5m
 # =每次获取的K线数量
-recent_candle_num = 1500
+recent_candle_num = 400
 
 
 
