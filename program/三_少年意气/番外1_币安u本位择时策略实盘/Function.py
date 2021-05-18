@@ -135,7 +135,7 @@ def usdt_future_exchange_info(exchange, symbol_config):
     for symbol in symbol_config.keys():
         symbol_config[symbol]['最小下单价精度'] = df.at[symbol, 'pricePrecision']
 
-        p = df.at[symbol, 'quantityPrecision']
+        p = float(df.at[symbol, 'quantityPrecision']) #
         symbol_config[symbol]['最小下单量精度'] = None if p == 0 else p
 
 

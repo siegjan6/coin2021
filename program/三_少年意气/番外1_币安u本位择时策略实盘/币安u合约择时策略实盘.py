@@ -64,6 +64,7 @@ def main(exchange):
         symbol_order_params = cal_all_order_info(symbol_signal, symbol_info, symbol_config, exchange)
         print('\n订单参数\n', symbol_order_params)
         if len(symbol_order_params) != 0:
+            wx.send_data('\n本周期交易计划:' + sys.argv[1] + ' ' + str(symbol_info))
             wx.send_data('\n本周期交易计划:' + sys.argv[1] + ' ' + str(symbol_signal))
         # 开始批量下单
         num = 5  # 批量下单的数量
@@ -105,10 +106,10 @@ if __name__ == '__main__':
                     'para': [350, 0.5],  # 策略参数
                     'position': .3,  # 该币种在总体资金中占比，几个币种相加要小于1
                     },
-        'DOGEUSDT': {'leverage': 2,  # 控制实际交易的杠杆倍数，在实际交易中可以自己修改。此处杠杆数，必须小于页面上的最大杠杆数限制
+        'DOGEUSDT': {'leverage': 1,  # 控制实际交易的杠杆倍数，在实际交易中可以自己修改。此处杠杆数，必须小于页面上的最大杠杆数限制
                     'strategy_name': 'real_signal_simple_bolling',  # 使用的策略的名称
                     'para': [300, 1.4],  # 策略参数
-                    'position': .4,  # 该币种在总体资金中占比，几个币种相加要小于1
+                    'position': .2,  # 该币种在总体资金中占比，几个币种相加要小于1
                     },
     }
 
@@ -119,6 +120,7 @@ if __name__ == '__main__':
         try:
             main(exchange)
         except Exception as e:
+            wx.send_data('系统出错，10s之后重新运行，出错原因：' + str(e))
             print('系统出错，10s之后重新运行，出错原因：' + str(e))
             print(e)
             time.sleep(long_sleep_time)
