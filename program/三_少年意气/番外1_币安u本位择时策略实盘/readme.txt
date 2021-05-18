@@ -12,12 +12,19 @@
 3. 币安有批量下单接口（最多5个），会使用该接口下单。
 4. 本程序同时适用u本位的永续合约、交割合约。在symbol_config中设置不同的symbol即可，例如比特币永续为BTCUSDT，交割为BTCUSDT_210625。
 
+之后版本计划增加的内容
+1. 自动发送钉钉的代码
+2. 增加针对自动减仓的应对
 
 # =====20210506版本说明
+第一个版本
 
-之后版本需要增加的内容
-1. 自动发送钉钉的代码
-2. 在程序刚开始的时候获取所有的历史数据
-3. 所以和交易所交互的地方，增加容错处理
-4. 增加针对自动减仓的应对
+# =====20210507版本说明
+Function.py中的usdt_future_exchange_info函数，df.at[symbol, 'pricePrecision']和df.at[symbol, 'quantityPrecision']的返回值可能为str，强制转化为int
 
+# =====20210513版本说明
+1. 在程序刚开始的时候获取所有的历史数据
+2. 修改在由空转多时，下单量计算的错误。原先空单的数量需要取绝对值。具体是修改cal_order_params函数中close_quality变量
+3. 所有和交易所交互的地方，增加容错处理
+4. 修改获得币对精度的函数usdt_future_exchange_info。原来精度取自于字段'pricePrecision', 'quantityPrecision'，但是这两个字段不准确，更新不及时。发现
+'tickSize', 'stepSize'这两个字段更新及时，修改为从这两个字段取相应精度。

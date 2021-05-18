@@ -9,6 +9,7 @@
 币安u本位择时策略实盘框架相关函数
 """
 import ccxt
+import math
 import pandas as pd
 from datetime import datetime, timedelta
 import time
@@ -49,6 +50,7 @@ def next_run_time(time_interval, ahead_seconds=5):
         time_interval = time_interval.replace('H', 'h')
     else:
         print('time_interval格式不符合规范。程序exit')
+        exit()
 
     ti = pd.to_timedelta(time_interval)
     now_time = datetime.now()
@@ -93,6 +95,44 @@ def sleep_until_run_time(time_interval, ahead_time=1, if_sleep=True):
     return run_time
 
 
+# ===将最新数据和历史数据合并
+def symbol_candle_data_append_recent_candle_data(symbol_candle_data, recent_candle_data, symbol_config, max_candle_num):
+
+    for symbol in symbol_config.keys():
+        df = symbol_candle_data[symbol].append(recent_candle_data[symbol], ignore_index=True)
+        df.drop_duplicates(subset=['candle_begin_time_GMT8'], keep='last', inplace=True)
+        df.sort_values(by='candle_begin_time_GMT8', inplace=True)  # 排序，理论上这步应该可以省略，加快速度
+        df = df.iloc[-max_candle_num:]  # 保持最大K线数量不会超过max_candle_num个
+        df.reset_index(drop=True, inplace=True)
+        symbol_candle_data[symbol] = df
+
+    return symbol_candle_data
+
+
+# ===重试机制
+def retry_wrapper(func, params={}, act_name='', sleep_seconds=3, retry_times=5):
+    """
+    需要在出错时不断重试的函数，例如和交易所交互，可以使用本函数调用。
+    :param func: 需要重试的函数名
+    :param params: func的参数
+    :param act_name: 本次动作的名称
+    :param sleep_seconds: 报错后的sleep时间
+    :param retry_times: 为最大的出错重试次数
+    :return:
+    """
+
+    for _ in range(retry_times):
+        try:
+            result = func(params=params)
+            return result
+        except Exception as e:
+            print(act_name, '报错，报错内容：', str(e), '程序暂停(秒)：', sleep_seconds)
+            time.sleep(sleep_seconds)
+    else:
+        # send_dingding_and_raise_error(output_info)
+        raise ValueError(act_name, '报错重试次数超过上限，程序退出。')
+
+
 # ==========交易所交互函数==========
 # ===判断当前持仓模式
 def if_oneway_mode(exchange):
@@ -103,7 +143,8 @@ def if_oneway_mode(exchange):
     :param exchange:
     :return:
     """
-    positionSide = exchange.fapiPrivateGetPositionSideDual()
+
+    positionSide = retry_wrapper(exchange.fapiPrivateGetPositionSideDual, act_name='查看合约持仓模式')
 
     if positionSide['dualSidePosition']:
         raise ValueError("当前持仓模式为双向持仓，程序已停止运行。请去币安官网改为单向持仓。")
@@ -122,21 +163,23 @@ def usdt_future_exchange_info(exchange, symbol_config):
     """
 
     # 获取u本为合约交易对的信息
-    exchange_info = exchange.fapiPublic_get_exchangeinfo()
+    exchange_info = retry_wrapper(exchange.fapiPublic_get_exchangeinfo, act_name='查看合约基本信息')
 
     # 转化为dataframe
     df = pd.DataFrame(exchange_info['symbols'])
-    # df['最小价格单位'] = df['filters'].apply(lambda x: x[0]['minPrice'])
-    # df['最小下单单位'] = df['filters'].apply(lambda x: x[1]['minQty'])
-    df = df[['symbol', 'pricePrecision', 'quantityPrecision']]
+    # df['minPrice'] = df['filters'].apply(lambda x: x[0]['minPrice'])
+    # df['minQty'] = df['filters'].apply(lambda x: x[1]['minQty'])
+    df['tickSize'] = df['filters'].apply(lambda x: math.log(1/float(x[0]['tickSize']), 10))
+    df['stepSize'] = df['filters'].apply(lambda x: math.log(1/float(x[1]['stepSize']), 10))
+    df = df[['symbol', 'pricePrecision', 'quantityPrecision', 'tickSize', 'stepSize']]
     df.set_index('symbol', inplace=True)
 
     # 赋值
     for symbol in symbol_config.keys():
-        symbol_config[symbol]['最小下单价精度'] = df.at[symbol, 'pricePrecision']
+        symbol_config[symbol]['最小下单价精度'] = round(df.at[symbol, 'tickSize'])
 
-        p = float(df.at[symbol, 'quantityPrecision']) #
-        symbol_config[symbol]['最小下单量精度'] = None if p == 0 else p
+        p = float(df.at[symbol, 'quantityPrecision'])  #
+        symbol_config[symbol]['最小下单量精度'] = None if p == 0 else round(p)
 
 
 # ===获取当前持仓信息
@@ -153,7 +196,8 @@ def binance_update_account(exchange, symbol_config, symbol_info):
     """
     # ===获取持仓数据===
     # 获取账户信息
-    account_info = exchange.fapiPrivateGetAccount()
+    # account_info = exchange.fapiPrivateGetAccount()
+    account_info = retry_wrapper(exchange.fapiPrivateGetAccount, act_name='查看合约账户信息')
 
     # 将持仓信息转变成dataframe格式
     positions_df = pd.DataFrame(account_info['positions'], dtype=float)
@@ -193,7 +237,9 @@ def ccxt_fetch_binance_candle_data(exchange, symbol, time_interval, limit):
     """
 
     # 获取数据
-    data = exchange.fapiPublic_get_klines({'symbol': symbol, 'interval': time_interval, 'limit': limit})
+    # data = exchange.fapiPublic_get_klines({'symbol': symbol, 'interval': time_interval, 'limit': limit})
+    data = retry_wrapper(exchange.fapiPublic_get_klines, act_name='获取币种K线数据',
+                         params={'symbol': symbol, 'interval': time_interval, 'limit': limit})
 
     # 整理数据
     df = pd.DataFrame(data, dtype=float)
@@ -230,7 +276,7 @@ def single_threading_get_binance_candle_data(exchange, symbol_config, symbol_inf
 
         # 如果获取数据为空，再次获取
         # if df.empty:
-        # continue
+            # continue
 
         # 获取到了最新数据
         print('结束时间：', datetime.now())
@@ -238,6 +284,46 @@ def single_threading_get_binance_candle_data(exchange, symbol_config, symbol_inf
         symbol_candle_data[symbol] = df[df['candle_begin_time_GMT8'] < pd.to_datetime(run_time)]  # 去除run_time周期的数据
 
     return symbol_candle_data
+
+
+# ===获取需要的币种的历史K线数据。
+def get_binance_history_candle_data(exchange, symbol_config, time_interval, candle_num, if_print=True):
+
+    symbol_candle_data = dict()  # 用于存储K线数据
+    print('获取交易币种的历史K线数据')
+
+    # 遍历每一个币种
+    for symbol in symbol_config.keys():
+
+        # 获取symbol该品种最新的K线数据
+        df = ccxt_fetch_binance_candle_data(exchange, symbol, time_interval, limit=candle_num)
+
+        # 为了保险起见，去掉最后一行最新的数据
+        df = df[:-1]
+
+        symbol_candle_data[symbol] = df  # 去除run_time周期的数据
+        time.sleep(medium_sleep_time)
+
+        if if_print:
+            print(symbol)
+            print(symbol_candle_data[symbol].tail(3))
+
+    return symbol_candle_data
+
+
+# ===批量下单
+def place_binance_batch_order(exchange, symbol_order_params):
+
+    num = 5  # 每个批量最多下单的数量
+    for i in range(0, len(symbol_order_params), num):
+        order_list = symbol_order_params[i:i + num]
+        params = {'batchOrders': exchange.json(order_list),
+                  'timestamp': int(time.time() * 1000)}
+        # order_info = exchange.fapiPrivatePostBatchOrders(params)
+        order_info = retry_wrapper(exchange.fapiPrivatePostBatchOrders, params=params, act_name='批量下单')
+
+        print('\n成交订单信息\n', order_info)
+        time.sleep(short_sleep_time)
 
 
 # ==========趋势策略相关函数==========
@@ -269,12 +355,11 @@ def calculate_signal(symbol_info, symbol_config, symbol_candle_data):
 
         # 需要计算的目标仓位
         target_pos = None
+
         # 根据策略计算出目标交易信号。
         if not df.empty:  # 当原始数据不为空的时候
             target_pos = getattr(Signals, symbol_config[symbol]['strategy_name'])(df, now_pos, avg_price,
                                                                                   symbol_config[symbol]['para'])
-            print(symbol)
-            print(target_pos)
             symbol_info.at[symbol, '目标持仓'] = target_pos
 
         # 根据目标仓位和实际仓位，计算实际操作
@@ -287,11 +372,9 @@ def calculate_signal(symbol_info, symbol_config, symbol_candle_data):
         elif now_pos == 0 and target_pos == -1:  # 开空
             symbol_signal['开空'].append(symbol)
         elif now_pos == 1 and target_pos == -1:  # 平多，开空
-            symbol_signal['平多'].append(symbol)
-            symbol_signal['开空'].append(symbol)
+            symbol_signal['平多开空'].append(symbol)
         elif now_pos == -1 and target_pos == 1:  # 平空，开多
-            symbol_signal['平空'].append(symbol)
-            symbol_signal['开多'].append(symbol)
+            symbol_signal['平空开多'].append(symbol)
 
         symbol_info.at[symbol, '信号时间'] = datetime.now()  # 计算产生信号的时间
 
@@ -314,12 +397,12 @@ def modify_order_quantity_and_price(symbol, symbol_config, params):
     """
 
     # 根据每个币种的精度，修改下单数量的精度
-    params['quantity'] = round(params['quantity'], int(symbol_config[symbol]['最小下单量精度']))
+    params['quantity'] = round(params['quantity'], symbol_config[symbol]['最小下单量精度'])
 
     # 买单加价2%，卖单降价2%
     params['price'] = params['price'] * 1.02 if params['side'] == 'BUY' else params['price'] * 0.98
     # 根据每个币种的精度，修改下单价格的精度
-    params['price'] = round(params['price'], int(symbol_config[symbol]['最小下单价精度']))
+    params['price'] = round(params['price'], symbol_config[symbol]['最小下单价精度'])
 
     return params
 
@@ -342,20 +425,24 @@ def cal_order_params(signal_type, symbol, symbol_info, symbol_config):
         'type': 'LIMIT',
         'timeInForce': 'GTC',
     }
+
     if signal_type in ['平空', '平多']:
         params['quantity'] = abs(symbol_info.at[symbol, '持仓量'])
 
     elif signal_type in ['开多', '开空']:
         params['quantity'] = symbol_info.at[symbol, '分配资金'] * symbol_config[symbol]['leverage'] / \
-                             symbol_info.at[symbol, '当前价格']
+                   symbol_info.at[symbol, '当前价格']
 
     else:
-        close_quantity = symbol_info.at[symbol, '持仓量']
+        close_quantity = abs(symbol_info.at[symbol, '持仓量'])
         open_quantity = symbol_info.at[symbol, '分配资金'] * symbol_config[symbol]['leverage'] / \
                         symbol_info.at[symbol, '当前价格']
         params['quantity'] = close_quantity + open_quantity
+
     # 修改精度
+    print(symbol, '修改精度前', params)
     params = modify_order_quantity_and_price(symbol, symbol_config, params)
+    print(symbol, '修改精度后', params)
 
     return params
 
@@ -388,7 +475,6 @@ def cal_all_order_info(symbol_signal, symbol_info, symbol_config, exchange):
 
         # 更新账户信息symbol_info
         symbol_info = binance_update_account(exchange, symbol_config, symbol_info)
-        print('\n更新持仓信息\n', symbol_info)
 
         # 标记出需要把利润算作保证金的仓位。
         for signal in symbol_signal.keys():
@@ -401,6 +487,7 @@ def cal_all_order_info(symbol_signal, symbol_info, symbol_config, exchange):
         balance = symbol_info.iloc[0]['账户权益'] - all_profit  # 初始投入资金
         balance = balance + profit  # 平仓之后的利润或损失
         symbol_info['分配资金'] = balance * symbol_info['分配比例']
+        print('\n更新持仓信息、分配资金信息\n', symbol_info)
 
     # 计算每个交易币种的各个下单参数
     for signal_type in symbol_signal.keys():
@@ -410,8 +497,6 @@ def cal_all_order_info(symbol_signal, symbol_info, symbol_config, exchange):
             if params['quantity'] == 0:  # 考察下单量是否为0
                 print('\n', symbol, '下单量为0，忽略')
             elif params['price'] * params['quantity'] <= 5:  # 和最小下单额5美元比较
-                print(params)
-                print(params['price'], params['quantity'])
                 print('\n', symbol, '下单金额小于5u，忽略')
             else:
                 # 改成str
