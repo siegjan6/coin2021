@@ -55,7 +55,7 @@ df.reset_index(inplace=True, drop=True)
 
 
 # =====获取策略参数组合
-para_list = signal_simple_bolling_para_list()
+para_list = signal_simple_turtle_para_list()
 
 
 # =====遍历参数
@@ -63,7 +63,7 @@ rtn = pd.DataFrame()
 for para in para_list:
     _df = df.copy()
     # 计算交易信号
-    _df = signal_simple_bolling(_df, para=para)
+    _df = signal_simple_turtle(_df, para=para)
     # 计算实际持仓
     _df = position_for_OKEx_future(_df)
     # 计算资金曲线

@@ -89,8 +89,8 @@ def save_spot_candle_data_from_exchange(exchange, symbol, time_interval, start_t
     df.to_csv(path, mode='a', index=False)
 
 
-start_time = '2021-03-29 00:00:00'
-end_date = '2021-04-30'  # 手工设定结束时间
+start_time = '2019-01-01 00:00:00'
+end_date = '2021-05-17'  # 手工设定结束时间
 date_list = []
 date = pd.to_datetime(start_time)
 while date <= pd.to_datetime(end_date):
@@ -117,7 +117,7 @@ for exchange in [ccxt.binance()]:
             continue
 
         # 遍历时间周期
-        for time_interval in ['5m', '30m', '1h']:
+        for time_interval in ['5m']:
             print(exchange.id, symbol, time_interval)
 
             # 抓取数据并且保存

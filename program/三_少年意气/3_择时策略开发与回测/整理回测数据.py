@@ -18,7 +18,7 @@ path = r'C:\Users\jan\Documents\GitHub\coin2021\data\spot'  # 改成电脑本地
 path_list = glob.glob(path + "/*/*.csv")  # python自带的库，获得某文件夹中所有csv文件的路径
 
 # 筛选出指定币种和指定时间
-symbol = 'DOGE-USDT_5m'
+symbol = 'BTC-USDT_5m'
 path_list = list(filter(lambda x: symbol in x, path_list))
 
 # 导入数据

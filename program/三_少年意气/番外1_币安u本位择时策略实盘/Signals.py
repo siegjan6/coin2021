@@ -11,7 +11,7 @@
 import pandas as pd
 import random
 import numpy as np
-
+import talib
 
 # 将None作为信号返回
 def real_signal_none(df, now_pos, avg_price, para):
@@ -102,6 +102,60 @@ def real_signal_simple_bolling(df, now_pos, avg_price, para=[200, 2]):
         signal = 0
 
     return signal
+
+
+# =====简单海龟策略
+# 策略
+"""
+ETH 15m
+[970, 190]    127.251525
+[980, 190]    118.995911
+[940, 190]    117.847937
+[960, 190]    112.464518
+[990, 190]    108.937249
+"""
+def signal_simple_turtle(df, now_pos, avg_price, para=[20, 10]):
+    """
+    今天收盘价突破过去20天中的收盘价和开盘价中的最高价，做多。今天收盘价突破过去10天中的收盘价的最低价，平仓。
+    今天收盘价突破过去20天中的收盘价和开盘价中的的最低价，做空。今天收盘价突破过去10天中的收盘价的最高价，平仓。
+    :param para: [参数1, 参数2]
+    :param df:
+    :return:
+    """
+    n1 = int(para[0])
+    n2 = int(para[1])
+
+    df['open_close_high'] = df[['open', 'close']].max(axis=1) #开收 的最高价
+    df['open_close_low'] = df[['open', 'close']].min(axis=1) #开收 的最低价
+    # 最近n1日的最高价、最低价
+    df['n1_high'] = df['open_close_high'].rolling(n1, min_periods=1).max()
+    df['n1_low'] = df['open_close_low'].rolling(n1, min_periods=1).min()
+
+    # 最近n2日的最高价、最低价
+    df['n2_high'] = df['open_close_high'].rolling(n2, min_periods=1).max()
+    df['n2_low'] = df['open_close_low'].rolling(n2, min_periods=1).min()
+
+    n1_high = df.iloc[-2]['n1_high']
+    n1_low = df.iloc[-2]['n1_low']
+    n2_high = df.iloc[-2]['n2_high']
+    n2_low = df.iloc[-2]['n2_low']
+    close = df.iloc[-2]['close']
+
+    signal = None
+    # ===找出做多信号
+    # 当天的收盘价 > n1日的最高价，做多
+    if close > n1_high:
+        signal = 1
+    elif close < n2_low:
+        signal = 0
+    elif close < n1_low:
+        signal = -1
+    elif close > n2_high:
+        signal = 0
+
+    return signal
+
+
 
 # 【西瓜蹲】自适应布林+bias+布林强盗止盈止损_BTC: 4.64 (达标)、ETH: 9.00 (达标)、参数1
 # https://bbs.quantclass.cn/thread/4378

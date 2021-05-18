@@ -1,4 +1,6 @@
 import os,sys
+import time
+
 if sys.platform != 'win32':
     sys.path.append('/root/coin2021')
 import pandas as pd
@@ -99,18 +101,13 @@ if __name__ == '__main__':
         'ETHUSDT': {'leverage': 2,  # 控制实际交易的杠杆倍数，在实际交易中可以自己修改。此处杠杆数，必须小于页面上的最大杠杆数限制
                     'strategy_name': 'real_signal_simple_bolling',  # 使用的策略的名称
                     'para': [220, 0.5],  # 策略参数
-                    'position': .3,  # 该币种在总体资金中占比，几个币种相加要小于1
+                    'position': .5,  # 该币种在总体资金中占比，几个币种相加要小于1
                     },
         'BTCUSDT': {'leverage': 2,  # 控制实际交易的杠杆倍数，在实际交易中可以自己修改。此处杠杆数，必须小于页面上的最大杠杆数限制
-                    'strategy_name': 'real_signal_simple_bolling',  # 使用的策略的名称
-                    'para': [350, 0.5],  # 策略参数
-                    'position': .3,  # 该币种在总体资金中占比，几个币种相加要小于1
-                    },
-        'DOGEUSDT': {'leverage': 1,  # 控制实际交易的杠杆倍数，在实际交易中可以自己修改。此处杠杆数，必须小于页面上的最大杠杆数限制
-                    'strategy_name': 'real_signal_simple_bolling',  # 使用的策略的名称
-                    'para': [300, 1.4],  # 策略参数
-                    'position': .2,  # 该币种在总体资金中占比，几个币种相加要小于1
-                    },
+                    'strategy_name': 'signal_simple_turtle',  # 使用的策略的名称
+                    'para': [970, 190],  # 策略参数
+                    'position': .5,  # 该币种在总体资金中占比，几个币种相加要小于1
+                    }
     }
 
     # =获取交易精度
@@ -124,3 +121,4 @@ if __name__ == '__main__':
             print('系统出错，10s之后重新运行，出错原因：' + str(e))
             print(e)
             time.sleep(long_sleep_time)
+            time.sleep(30)
