@@ -11,7 +11,7 @@
 import pandas as pd
 import random
 import numpy as np
-import talib
+
 
 # 将None作为信号返回
 def real_signal_none(df, now_pos, avg_price, para):
