@@ -37,3 +37,4 @@ while True:
         print('最大价差：' + str(max_diff) + ' <目标价差：' + str(diff_target) + ', '
               + str(time_interval) + '秒后重新抓取最大价差')
     time.sleep(time_interval)
+ ‘
