@@ -124,6 +124,8 @@ def signal_simple_turtle(df, now_pos, avg_price, para=[20, 10]):
     """
     n1 = int(para[0])
     n2 = int(para[1])
+    close = df.iloc[-1]['close']
+    df = df[:-1]
 
     df['open_close_high'] = df[['open', 'close']].max(axis=1) #开收 的最高价
     df['open_close_low'] = df[['open', 'close']].min(axis=1) #开收 的最低价
@@ -135,24 +137,22 @@ def signal_simple_turtle(df, now_pos, avg_price, para=[20, 10]):
     df['n2_high'] = df['open_close_high'].rolling(n2, min_periods=1).max()
     df['n2_low'] = df['open_close_low'].rolling(n2, min_periods=1).min()
 
-    n1_high = df.iloc[-2]['n1_high']
-    n1_low = df.iloc[-2]['n1_low']
-    n2_high = df.iloc[-2]['n2_high']
-    n2_low = df.iloc[-2]['n2_low']
-    close = df.iloc[-2]['close']
+    n1_high = df.iloc[-1]['n1_high']
+    n1_low = df.iloc[-1]['n1_low']
+    n2_high = df.iloc[-1]['n2_high']
+    n2_low = df.iloc[-1]['n2_low']
 
     signal = None
     # ===找出做多信号
     # 当天的收盘价 > n1日的最高价，做多
-    if close > n1_high:
+    if close >= n1_high:
         signal = 1
-    elif close < n2_low:
+    elif close <= n2_low:
         signal = 0
-    elif close < n1_low:
+    elif close <= n1_low:
         signal = -1
-    elif close > n2_high:
+    elif close >= n2_high:
         signal = 0
-
     return signal
 
 
