@@ -89,8 +89,8 @@ def save_spot_candle_data_from_exchange(exchange, symbol, time_interval, start_t
     df.to_csv(path, mode='a', index=False)
 
 
-start_time = '2019-01-01 00:00:00'
-end_date = '2021-05-17'  # 手工设定结束时间
+start_time = '2020-05-24 00:00:00'
+end_date = '2021-05-24'  # 手工设定结束时间
 date_list = []
 date = pd.to_datetime(start_time)
 while date <= pd.to_datetime(end_date):

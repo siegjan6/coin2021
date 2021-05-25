@@ -102,7 +102,7 @@ if __name__ == '__main__':
     symbol_config = {
         'BTCUSDT': {'leverage': 2,  # 控制实际交易的杠杆倍数，在实际交易中可以自己修改。此处杠杆数，必须小于页面上的最大杠杆数限制
                     'strategy_name': 'real_signal_simple_bolling',  # 使用的策略的名称
-                    'para': [350, 0.5],  # 策略参数
+                    'para': [950, 3.8],  # 策略参数
                     'position': .5,  # 该币种在总体资金中占比，几个币种相加要小于1
                     },
         'ETHUSDT': {'leverage': 2,  # 控制实际交易的杠杆倍数，在实际交易中可以自己修改。此处杠杆数，必须小于页面上的最大杠杆数限制
