@@ -74,7 +74,7 @@ def main(exchange, symbol_config, time_interval):
         place_binance_batch_order(exchange, symbol_order_params)
 
         if len(symbol_order_params) != 0:
-            wx.send_data('\n本周期交易计划:' + sys.argv[1] + ' ' + str(symbol_signal))
+            wx.send_data('\n本周期交易计划:' + sys.argv[1] + ' ' + str(symbol_signal) + str(symbol_candle_data.iloc[-1]['close']))
         # 本次循环结束
         print('\n', '-' * 40, '本次循环结束，%d秒后进入下一次循环' % long_sleep_time, '-' * 40, '\n\n')
         time.sleep(long_sleep_time)
