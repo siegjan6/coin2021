@@ -69,6 +69,8 @@ def real_signal_simple_bolling(df, now_pos, avg_price, para=[200, 2]):
     n = int(para[0])
     m = para[1]
 
+    df = df[:-1]
+
     # ===计算指标
     # 计算均线
     df['median'] = df['close'].rolling(n).mean()  # 此处只计算最后几行的均线值，因为没有加min_period参数
@@ -124,8 +126,8 @@ def signal_simple_turtle(df, now_pos, avg_price, para=[20, 10]):
     """
     n1 = int(para[0])
     n2 = int(para[1])
-    close = df.iloc[-1]['close']
     df = df[:-1]
+    close = df.iloc[-1]['close']
 
     df['open_close_high'] = df[['open', 'close']].max(axis=1) #开收 的最高价
     df['open_close_low'] = df[['open', 'close']].min(axis=1) #开收 的最低价
@@ -137,10 +139,10 @@ def signal_simple_turtle(df, now_pos, avg_price, para=[20, 10]):
     df['n2_high'] = df['open_close_high'].rolling(n2, min_periods=1).max()
     df['n2_low'] = df['open_close_low'].rolling(n2, min_periods=1).min()
 
-    n1_high = df.iloc[-1]['n1_high']
-    n1_low = df.iloc[-1]['n1_low']
-    n2_high = df.iloc[-1]['n2_high']
-    n2_low = df.iloc[-1]['n2_low']
+    n1_high = df.iloc[-2]['n1_high']
+    n1_low = df.iloc[-2]['n1_low']
+    n2_high = df.iloc[-2]['n2_high']
+    n2_low = df.iloc[-2]['n2_low']
 
     signal = None
     # ===找出做多信号
